@@ -1,0 +1,7 @@
+#
+#Do not track any *.o *.a *.pyc or *.html files
+#
+
+**/*.[oa]
+**/*.pyc
+**/*.html
