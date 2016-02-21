@@ -1,0 +1,13 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP MCP4013
+D Low-Cost 64-Step Volatile Digital POT
+K Digital POT
+$ENDCMP
+#
+$CMP PCA9535
+D The PCA9535 and PCA9535C provide 16 bits of General Purpose parallel Input/Output expansion for I2C-bus/SMBus
+K PCA9535 PCA9535C 16bit GPIO I2C
+$ENDCMP
+#
+#End Doc Library

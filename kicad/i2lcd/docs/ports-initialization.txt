@@ -1,0 +1,36 @@
+    REJESTR FUNKCJA
+    0       INPUT OF PORT 0
+    1       INPUT OF PORT 1
+    2       OUTPUT OF PORT 0
+    3       OUTPUT OF PORT 1
+    4       POLARITY OF PORT 0 (1 - inverted)
+    5       POLARITY OF PORT 1 (1 - inverted)
+    6       DIRECTION OF PORT 0 (1 - input)
+    7       DIRECTION OF PORT 1 (1 - input)
+
+    1. PORT 0 DIRECTION (REGISTER 6) - 0x08
+        1   - 0 - IO 0 - E    - OUTPUT
+        2   - 0 - IO 1 - RW   - OUTPUT
+        4   - 0 - IO 2 - RS   - OUTPUT
+        8   - 1 - IO 3 - IRS  - INPUT
+        16  - 0 - IO 4 - PWR  - OUTPUT
+        32  - 0 - IO 5 - UD   - OUTPUT
+        64  - 0 - IO 6 - ACS  - OUTPUT
+        127 - 0 - IO 7 - BCS  - OUTPUT
+    2. PORT 0 VALUES (REGISTER 2)   -  0xE0
+        1   - 0 - E     - DISABLED
+        2   - 0 - RW    - WRITE
+        4   - 0 - RS    - COMMAND
+        8   - -------------------
+        16  - 0 - PWR   - OFF
+        32  - 1 - UD    - UP
+        64  - 1 - ACS   - DISABLED
+        128 - 1 - BCS   - DISABLED
+    3. PORT 1 DIRECTION (REGISTER 7)    -   0xFF
+        1 - 127 - IO 0 - 7 - D0 - D7
+    4. PORT 1 VALUES (REGISTER 3)       - 0x00
+        1 - 127 - IO 0 - 7 - D0 - D7
+        
+        
+        
+        

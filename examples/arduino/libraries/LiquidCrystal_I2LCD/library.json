@@ -1,0 +1,23 @@
+{
+"name": "LiquidCrystal_I2LCD",
+"frameworks": "Arduino",
+"keywords": "HD4470, LCD, I2C, display, module, PCA9535",
+"description": "Control HD4470 through PCA9535 I2C GPIO extender chip",
+"authors":
+[
+    {
+        "name": "Jarek Zok",
+        "email": "jarekzok@gmail.com",
+        "url": "https://github.com/lucidm/i2lcd",
+        "maintainer": true
+    },
+    {
+        "name": "Jarek Zok"
+    },
+],
+"repository":
+{
+    "type": "git",
+    "url": "https://github.com/lucidm/i2lcd"
+}
+}
