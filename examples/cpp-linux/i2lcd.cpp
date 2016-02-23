@@ -91,12 +91,17 @@ LcdType::LcdType(t_LCDType type) : lcdtype(type)
     rowaddr[2] = 0x10;
     rowaddr[3] = 0x50;
 
+    if (type == D12x4)
+    {
+        rowaddr[2] -= 4;
+        rowaddr[3] -= 4;
+    }
+
     if (type == D20x4)
     {
         rowaddr[2] |= 4;
         rowaddr[3] |= 4;
     }
-
 }
 
 /**
