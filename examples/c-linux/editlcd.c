@@ -99,7 +99,7 @@ static struct option options[] =
     {"bus", optional_argument, 0, 'b'},
     {"columns", required_argument, 0, 'c'},
     {"rows", required_argument, 0, 'r'},
-    {"header", required_argument, 0, 'f'},
+    {"header", optional_argument, 0, 'f'},
     {"help", no_argument, 0, 'h'},
     {0, 0, 0, 0},
 };
@@ -109,7 +109,14 @@ void help(char **argv, char *adstr)
     int i;
     uint8_t c, r;
 
-    printf("%s\n%s\nAvailable options:\n\t--help display this help\n\t--address=<I2C chip address> default 0x20\n\t--bus=<bus number> default 0x02\n\t--columns=<number of columns>\n\t--rows=<number of rows>\n\t--header=<file> save character bitmap to given file\n\nSupported display configurations:\n", argv[0], adstr);
+    printf("%s\n%s\nAvailable options:\n"
+           "\t--help display this help\n"
+           "\t--address=<I2C chip address> default 0x20\n"
+           "\t--bus=<bus number> default 0x02\n"
+           "\t--columns=<number of columns>\n"
+           "\t--rows=<number of rows>\n"
+           "\t--header=<file> save character bitmap to given file\n\n"
+           "Supported display configurations:\n", argv[0], adstr);
     for(i=0; i < LCD_TYPES_CNT;  i++)
     {
         getSize(lcdTypesArray[i], &c, &r);
@@ -348,7 +355,7 @@ void openEditor(struct options_values *options, struct editor *e)
                        "\t'PgDown'\tNext character\n"
                        "\t'F1'\tto wipe character\n"
                        "\t'F2'\tto reverse colors\n"
-                       "\t's'\tTo save GC to header file\n",
+                       "\t'S'\tTo save GC to header file\n",
                gcWindowHandler, gcActivateHandler);
     p1->lcd = &e->lcd;
     p1->gcn = 0;
