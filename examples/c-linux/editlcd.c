@@ -1,11 +1,13 @@
 #include <i2lcd.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <getopt.h>
 #include <panel.h>
 #include <form.h>
 
@@ -48,9 +50,20 @@ struct editor {
 
 struct editor ed;
 
+struct options_values
+{
+    int address;
+    int bus;
+    int columns;
+    int rows;
+    char headername[32];
+};
+
+struct options_values args;
+
 void emove(t_I2Lcd *lcd, WINDOW *w, int col, int row);
 void showPanel(struct panelw *panel, char *label);
-void openEditor(t_DisplayType type, struct editor *e);
+void openEditor(struct options_values *options, struct editor *e);
 void closeEditor(struct editor *e);
 void editorCursor(struct editor *e);
 
@@ -80,13 +93,101 @@ void joinWindows(struct panelw *current, struct panelw *next);
 char savebin(struct panelw *p);
 char savehex(struct panelw *p);
 
-int main(void)
+static struct option options[] =
+{
+    {"address", optional_argument, 0, 'a'},
+    {"bus", optional_argument, 0, 'b'},
+    {"columns", required_argument, 0, 'c'},
+    {"rows", required_argument, 0, 'r'},
+    {"header", required_argument, 0, 'f'},
+    {"help", no_argument, 0, 'h'},
+    {0, 0, 0, 0},
+};
+
+void help(char **argv, char *adstr)
+{
+    int i;
+    uint8_t c, r;
+
+    printf("%s\n%s\nAvailable options:\n\t--help display this help\n\t--address=<I2C chip address> default 0x20\n\t--bus=<bus number> default 0x02\n\t--columns=<number of columns>\n\t--rows=<number of rows>\n\t--header=<file> save character bitmap to given file\n\nSupported display configurations:\n", argv[0], adstr);
+    for(i=0; i < LCD_TYPES_CNT;  i++)
+    {
+        getSize(lcdTypesArray[i], &c, &r);
+        printf("  %dx%d\n", c, r);
+    }
+    exit(0);
+}
+
+int main(int argc, char **argv)
 {
     int c, i;
 
     struct panelw *actw;
     MEVENT event;
     const char *cb;
+
+    args.address = 0x20;
+    args.bus = 0x02;
+    args.columns = 16;
+    args.rows = 2;
+
+    do
+    {
+        i = 0;
+        c = getopt_long(argc, argv, "abc::r::h", options, &i);
+        switch(c)
+        {
+            case 'a':
+                if (optarg)
+                {
+                    args.address = strtoul(optarg, NULL, 0);
+                    if (args.address == 0x00)
+                        help(argv, "Address of a chip must be a number!");
+                }
+                break;
+            case 'b':
+                if (optarg)
+                {
+                    args.bus = strtoul(optarg, NULL, 0);
+                    if (args.bus == 0x00)
+                        help(argv, "Bus number must be a number!");
+                }
+                break;
+            case 'c':
+                if (optarg)
+                {
+                    args.columns = strtoul(optarg, NULL, 0);
+                    if (args.columns == 0x00)
+                        help(argv, "The display is not in the list below:");
+                }
+                break;
+            case 'r':
+                if (optarg)
+                {
+                    args.rows = strtoul(optarg, NULL, 0);
+                    if (args.rows == 0x00)
+                        help(argv, "The display is not in the list below:");
+                }
+                break;
+            case 'f':
+                if (optarg)
+                    strncpy(args.headername, optarg, 32);
+                else
+                    strncpy(args.headername, "./gcbitmap.h", 32);
+                break;
+            case 'h':
+                help(argv, "");
+            case -1:
+                break;
+            case '?':
+                help(argv, "Unknown option");
+                break;
+            default:
+                help(argv, "No options given");
+                break;
+
+        }
+    }while(c != -1);
 
     initscr();
     refresh();
@@ -108,7 +209,7 @@ int main(void)
 	wbkgd(stdscr, COLOR_PAIR(4));
     }
 
-    openEditor(D12x4, &ed);
+    openEditor(&args, &ed);
     actw = ed._actw;
     for(i=0; i < 8; i++)
         lcdSetGC(&ed.lcd, i, gcbitmap[i]);
@@ -201,14 +302,14 @@ void showPanel(struct panelw *panel, char *label)
 /**
  * Open main editor interface windows
  */
-void openEditor(t_DisplayType type, struct editor *e)
+void openEditor(struct options_values *options, struct editor *e)
 {
     char title[100];
     int i;
     struct panelw *p0, *p1, *p2;
     FIELD *f[2];
 
-    openI2LCD(&e->lcd, 2, 0x20, type);
+    openI2LCD2(&e->lcd, options->bus, options->address, options->columns, options->rows);
     lcdPower(&e->lcd, POWERON);
     lcdSetBacklight(&e->lcd, 0x3f);
     lcdSetContrast(&e->lcd, 0x0a);
@@ -247,7 +348,7 @@ void openEditor(t_DisplayType type, struct editor *e)
                        "\t'PgDown'\tNext character\n"
                        "\t'F1'\tto wipe character\n"
                        "\t'F2'\tto reverse colors\n"
-                       "\t's'\tTo save gcbitmap.h file in current directory\n",
+                       "\t's'\tTo save GC to header file\n",
                gcWindowHandler, gcActivateHandler);
     p1->lcd = &e->lcd;
     p1->gcn = 0;
@@ -259,7 +360,7 @@ void openEditor(t_DisplayType type, struct editor *e)
                        "\tSet value 0-f for value under cursor\n"
                        "\t'PgUp'\tPrevious character\n"
                        "\t'PgDown'\tNext character\n"
-                       "\t's'\tTo save gcbitmap.h file in current directory\n",
+                       "\t's'\tTo save GC to header file\n",
                gchWindowHandler, NULL);
     p2->lcd = &e->lcd;
 
@@ -715,7 +816,7 @@ char savebin(struct panelw *p)
     int i, j, b;
     FILE *f;
     const char *cb;
-    if((f = fopen("./gcbitmap.h", "w+")) > 0)
+    if((f = fopen(args.headername, "w+")) > 0)
     {
         fprintf(f, "char gcbitmap[8][8] = {\n");
         for(i=0; i<8; i++)
@@ -744,7 +845,7 @@ char savehex(struct panelw *p)
     int i, j, b;
     FILE *f;
     const char *cb;
-    if((f = fopen("./gcbitmap.h", "w+")) > 0)
+    if((f = fopen(args.headername, "w+")) > 0)
     {
         fprintf(f, "char gcbitmap[8][8] = {\n");
         for(i=0; i<8; i++)

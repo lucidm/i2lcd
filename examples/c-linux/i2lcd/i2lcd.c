@@ -4,18 +4,68 @@
 #include <stdarg.h>
 #include <i2lcd.h>
 
-static const uint8_t ddramadr[10][6] = {
-    {8,  1, 0x00, 0x00, 0x00, 0x00},
-    {12, 4, 0x00, 0x40, 0x0C, 0x4C}, //12x4
-    {16, 1, 0x00, 0x00, 0x00, 0x00}, //16x1 type 1
-    {8,  2, 0x00, 0x40, 0x00, 0x40}, //16x1 type 2 more popular
-    {16, 2, 0x00, 0x40, 0x00, 0x40}, //16x2
-    {16, 4, 0x00, 0x40, 0x10, 0x50}, //16x4
-    {20, 2, 0x00, 0x40, 0x00, 0x40}, //20x2
-    {20, 4, 0x00, 0x40, 0x14, 0x54}, //20x4
-    {24, 2, 0x00, 0x40, 0x00, 0x40}, //24x2
-    {40, 2, 0x00, 0x40, 0x00, 0x40}, //40x2
-};
+const t_DisplayType lcdTypesArray[] = {D6x1, D8x1, D8x2, D12x4, D16x0, D16x1, D16x2, D16x4, D20x2, D20x4, D24x2, D40x2};
+
+/**
+ * @brief Helper function to space argument bits apart, so we can interleve
+ *        them with second argument.
+ * @param argument to interleve
+ */
+static uint16_t _partbyte(uint16_t n)
+{
+    n &= 0x00ff;
+    n = (n | (n << 8)) & 0x00ff00ff;
+    n = (n | (n << 4)) & 0x0f0f0f0f;
+    n = (n | (n << 2)) & 0x33333333;
+    n = (n | (n << 1)) & 0x55555555;
+    return n;
+}
+
+/**
+ * @brief Reverse _partbyte() method, to get two arguments back in
+ *        deinterleave operation.
+ * @param argument to deinterleave
+ */
+static uint16_t _unpartbyte(uint16_t n)
+{
+    n &= 0x5555;
+    n = (n ^ (n >> 1)) & 0x33333333;
+    n = (n ^ (n >> 2)) & 0x0f0f0f0f;
+    n = (n ^ (n >> 4)) & 0x00ff00ff;
+    n = (n ^ (n >> 8)) & 0x0000ffff;
+    return n;
+}
+
+/**
+ * @brief interleves bits from width and height of the display
+ *        and for respresenting them as one integer value
+ * @param width of the display
+ * @param height of the display
+ * @return interleved values of width and height
+ */
+static uint16_t _interleave(uint8_t width, uint8_t height)
+{
+    return _partbyte(width) | (_partbyte(height) << 1);
+}
+
+/**
+ * @brief opposite function to the _interleave(). Returns 16 bit value
+ *        with most significant byte set to width of the display
+ *        and last significant byte set to height of the display.
+ * @param value of interleved width and height
+ * @return two bytes in 16 bit word.
+ */
+static uint16_t _deinterleave(uint16_t n)
+{
+    return (_unpartbyte(n) << 8) | _unpartbyte(n >> 1);
+}
+
+void getSize(t_DisplayType type, uint8_t *columns, uint8_t *rows)
+{
+    uint16_t ret = _deinterleave((uint16_t) type);
+    *columns = (ret >> 8);
+    *rows = ret & 0xff;
+}
 
 static inline void setControl(t_I2Lcd *lcd, uint8_t control, uint8_t value)
 {
@@ -90,9 +140,17 @@ static inline void command(t_I2Lcd *lcd, t_Command command, uint8_t value)
     lcd->commands[(uint8_t) command] = value;
 }
 
+void openI2LCD2(t_I2Lcd *lcd, uint8_t bus, uint8_t address, uint8_t columns, uint8_t rows)
+{
+    t_DisplayType archit = (t_DisplayType) _interleave(columns, rows);
+    openI2LCD(lcd, bus, address, archit);
+}
 
 void openI2LCD(t_I2Lcd *lcd, uint8_t bus, uint8_t address, t_DisplayType archit)
 {
+    t_DisplayType t = archit;
+    uint16_t tmp;
+
     openPCA9535(&lcd->iface, bus, address);
 
     lcd->control = 0x00;
@@ -107,9 +165,36 @@ void openI2LCD(t_I2Lcd *lcd, uint8_t bus, uint8_t address, t_DisplayType archit)
     lcd->control |= getPortOutput(&lcd->iface, CPORT);
     setPortOutput(&lcd->iface, CPORT, lcd->control);
 
-    lcd->ddramadr = ddramadr[archit]+2;
-    lcd->cols = ddramadr[archit][0];
-    lcd->rows = ddramadr[archit][1];
+    if(archit == D16x1)
+        t = D8x2;
+
+    tmp = _deinterleave((uint16_t) t);
+    *((uint32_t*)&lcd->ddramadr) = 0x00;
+
+    lcd->cols = tmp >> 8;
+    lcd->rows = (tmp & 0x00ff) ? (tmp & 0x00ff) : 1; //D16x0 means D16x1 with linear addressing
+
+    if (!(archit == D6x1 || archit == D8x1 || archit == D16x0))
+    {
+        lcd->ddramadr[1] = 0x40;
+        if (!(archit == D8x2 || archit == D16x1 || archit == D16x2 || archit == D20x2 || archit == D24x2 || archit == D40x2))
+        {
+            lcd->ddramadr[2] = 0x10;
+            lcd->ddramadr[3] = 0x50;
+
+            if (archit == D12x4)
+            {
+                lcd->ddramadr[2] -= 4;
+                lcd->ddramadr[3] -= 4;
+            }
+
+            if (archit == D20x4)
+            {
+                lcd->ddramadr[2] |= 4;
+                lcd->ddramadr[3] |= 4;
+            }
+        }
+    }
 
     lcd->dtype = archit;
 

@@ -59,18 +59,23 @@ typedef enum command {
 #define POWEROFF 0
 
 
+#define LCD_TYPES_CNT 12
 typedef enum e_darch {
-    D8x1,
-    D12x4,
-    D16x0,
-    D16x1,
-    D16x2,
-    D16x4,
-    D20x2,
-    D20x4,
-    D24x2,
-    D40x2,
+    D6x1 = 22,
+    D8x1 = 66,
+    D8x2 = 72,
+    D12x4 = 122,
+    D16x0 = 256,
+    D16x1 = 258,
+    D16x2 = 264,
+    D16x4 = 288,
+    D20x2 = 280,
+    D20x4 = 304,
+    D24x2 = 328,
+    D40x2 = 1096,
 } t_DisplayType;
+
+extern const t_DisplayType lcdTypesArray[];
 
 /**
  * @brief Structure representing current state of an LCD.
@@ -80,7 +85,7 @@ typedef struct s_i2lcd {
     uint8_t bus; /**< I2C bus number */
     uint8_t address; /**< I2C chip address*/
 
-    const uint8_t *ddramadr; /**< array of rows addresses */
+    uint8_t ddramadr[4]; /**< array of rows addresses */
 
     uint8_t buffer[4][40]; /**< temporary buffer for display */
     uint8_t commands[8]; /**< commands state buffer*/
@@ -112,6 +117,9 @@ typedef struct s_i2lcd {
  */
 void _lcdPrintf(t_I2Lcd *lcd, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
 #define lcdPrintf(lcd, fmt, ...) _lcdPrintf(lcd, fmt, ##__VA_ARGS__)
+
+void getSize(t_DisplayType type, uint8_t *columns, uint8_t *rows);
+void openI2LCD2(t_I2Lcd *lcd, uint8_t bus, uint8_t address, uint8_t columns, uint8_t rows);
 
 /**
  * @brief Fill t_I2Lcd structure with proper values. Will open i2c device, set
