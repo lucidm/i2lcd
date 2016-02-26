@@ -27,10 +27,12 @@ class I2LCD(object):
 		40 : {2 : [0x00, 0x40], 4 : [0x00, 0x40, 0x00, 0x40]}
 	      }
 
+    pottranstable = [0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63]
+
 
     def __init__(self, bus, address, cols, rows):
 	self.iface = PCA9535(bus, address)
-	
+
 
 	if not self.memaddr.has_key(cols):
 	    raise NotImplementedError
@@ -54,13 +56,13 @@ class I2LCD(object):
 
 	self.control |= self.iface.getPortOutput(lcdconst.CPORT)
 	self.setControl(self.control, 1)
-	self.commands = {lcdconst.CLEAR_DISPLAY : 0, 
-			    lcdconst.CURSOR_HOME : 0, 
-			    lcdconst.ENTRY_MODE_SET : 0, 
-			    lcdconst.DISPLAY_ONOFF : 0, 
-			    lcdconst.CURSOR_DISPLAY_SHIFT : 0, 
-			    lcdconst.FUNCTION_SET : 0, 
-			    lcdconst.SET_CGRAM_ADDRESS : 0, 
+	self.commands = {lcdconst.CLEAR_DISPLAY : 0,
+			    lcdconst.CURSOR_HOME : 0,
+			    lcdconst.ENTRY_MODE_SET : 0,
+			    lcdconst.DISPLAY_ONOFF : 0,
+			    lcdconst.CURSOR_DISPLAY_SHIFT : 0,
+			    lcdconst.FUNCTION_SET : 0,
+			    lcdconst.SET_CGRAM_ADDRESS : 0,
 			    lcdconst.SET_DDRAM_ADDRESS : 0}
 	self.waitflag = 0
 
@@ -223,7 +225,7 @@ class I2LCD(object):
 	    self.init()
 
     def setContrast(self, value):
-	self.cpot.set(value)
+	self.cpot.set(0x3f - self.pottranstable[value])
 
     def setBacklight(self, value):
 	self.bpot.set(value)

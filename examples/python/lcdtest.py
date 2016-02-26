@@ -26,7 +26,7 @@ if __name__ == "__main__":
 		    ])
 
     lcd.setBacklight(0x3f)
-    lcd.setContrast(0x0c)
+    lcd.setContrast(0x17)
     lcd.blink(True)
     lcd.cursor(True)
 

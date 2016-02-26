@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-pg -Og
+CFLAGS=-Og
 LFLAGS=
 OBJS=i2lcd/pca9535.o i2lcd/pots.o i2lcd/i2lcd.o
 
@@ -16,7 +16,7 @@ $(OBJS): i2lcd/%.o: i2lcd/%.c
 	$(MAKE) -C i2lcd
 
 clean:
-	rm -f *.o lcdtest
+	rm -f *.o lcdtest editlcd
 	$(MAKE) -C i2lcd $@
 
 .PHONY: all clean

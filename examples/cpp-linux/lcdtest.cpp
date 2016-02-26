@@ -18,11 +18,11 @@ int main(void)
 		    0b00000,};
 
 
-    I2Lcd lcd(2, 0x20, 16, 1);
+    I2Lcd lcd(2, 0x20, 16, 2);
 
     lcd.power(POWERON);
     lcd.setBacklight(0x3f);
-    lcd.setContrast(0x08);
+    lcd.setContrast(0x17);
     lcd.setGC(2, c2);
 
     lcd.clear();
