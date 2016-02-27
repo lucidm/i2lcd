@@ -11,7 +11,7 @@ void setup() {
   
   // put your setup code here, to run once:
   i2lcd.begin(D16x2);
-  i2lcd.setContrast(0x0c);
+  i2lcd.setContrast(0x23);
   i2lcd.clear();
   i2lcd.blink();
   i2lcd.cursor();
@@ -27,7 +27,7 @@ void loop() {
     delay(25);
    }
    acu /= 10;
-   acu = map(acu, 100, 800, 0x29, 0x3f);
+   acu = map(acu, 100, 800, 0x0f, 0x3f);
    if (acu != oldac)
    {
       uint8_t diff;
