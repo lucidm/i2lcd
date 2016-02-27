@@ -319,15 +319,15 @@ void openEditor(struct options_values *options, struct editor *e)
     openI2LCD2(&e->lcd, options->bus, options->address, options->columns, options->rows);
     lcdPower(&e->lcd, POWERON);
     lcdSetBacklight(&e->lcd, 0x3f);
-    lcdSetContrast(&e->lcd, 0x0a);
+    lcdSetContrast(&e->lcd, 0x17);
     lcdBlink(&e->lcd, 1);
     lcdCursor(&e->lcd, 1);
     lcdClear(&e->lcd);
 
     lcdPrintf(&e->lcd, "LCDEd v1.0\x01");
 
-    e->brght = e->lcd.bpot.current;
-    e->contr = e->lcd.cpot.current;
+    e->brght = 0x3f;
+    e->contr = 0x17;
 
     snprintf(title, 100, "LCD %dx%d:", e->lcd.cols, e->lcd.rows);
 

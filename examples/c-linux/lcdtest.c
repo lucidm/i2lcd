@@ -5,34 +5,39 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
 #include <time.h>
-#include <math.h>
 
 #define BUS 2
 #define ADDRESS 0x20
 
-#define DEGRAD (M_PI/180.0)
+uint8_t quit;
 
-void dumplcd(t_I2Lcd *lcd)
+void shandler(int signo)
 {
-    uint8_t i;
-
-    printf("+");
-    for(i=0; i < lcd->cols; i++) printf("-");
-    printf("+\n");
-    for(i=0; i < lcd->rows; i++)
-        printf("|%s|\n", lcdReadRow(lcd, i), "|");
-    printf("+");
-    for(i=0; i < lcd->cols; i++) printf("-");
-    printf("+\n");
+    if (signo == SIGINT)
+	quit = 1;
 }
 
-uint32_t getts()
+void brght(t_I2Lcd *lcd, uint8_t v)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return 1000000 * tv.tv_sec + tv.tv_usec;
+    if(quit) return;
+    lcdSetCursor(lcd, 0, 0);
+    lcdPrintf(lcd, "Brightness 0x%02X", v);
+    lcdSetBacklight(lcd, v);
+    usleep(100000);
 }
+
+
+void ctrst(t_I2Lcd *lcd, uint8_t v)
+{
+    if(quit) return;
+    lcdSetCursor(lcd, 0, 1);
+    lcdPrintf(lcd, "Contrast 0x%02X\x02", v);
+    lcdSetContrast(lcd, v);
+    usleep(100000);
+}
+
 
 int main(void)
 {
@@ -41,6 +46,11 @@ int main(void)
     unsigned long ts;
     int i;
     char b[255], c;
+
+    quit = 0;
+
+    if (signal(SIGINT, shandler) == SIG_ERR)
+	printf("Cant install SIGINT handler!\n");
 
     uint8_t c2[8] = {
 		    0b00000,
@@ -53,39 +63,30 @@ int main(void)
 		    0b00000,};
 
 
-    ts = getts();
-
-    openI2LCD(&lcd, BUS, ADDRESS, D16x2);
+    openI2LCD2(&lcd, BUS, ADDRESS, 16, 2);
     lcdPower(&lcd, POWERON);
     lcdSetBacklight(&lcd, 0x3f);
-    lcdSetContrast(&lcd, 0x0a);
+    lcdSetContrast(&lcd, 0x17);
     lcdBlink(&lcd, 1);
     lcdCursor(&lcd, 1);
-
     lcdClear(&lcd);
 
     lcdSetCursor(&lcd, 0, 0);
     lcdSetGC(&lcd, 2, c2);
 
-    ts = getts();
-    lcdPrintf(&lcd, "Hello World!");
-    ts = getts() - ts;
-
-    lcdSetCursor(&lcd, 0, 1);
-    lcdPrintf(&lcd, "Line No:%d", __LINE__);
-
-    dumplcd(&lcd);
-
-    for(i=0; i<450; i++)
+    do
     {
-        lcdSetBacklight(&lcd, (36 + 27 * sin((float)i * DEGRAD)));
-        usleep(10000);
-    }
+	for(i=0; i < 0x40; i++)
+	{
+	    brght(&lcd, i);
+	}
 
-    usleep(3000 * 1000);
+	for(i=0; i < 0x40; i++)
+	{
+	    ctrst(&lcd, i);
+	}
+	ctrst(&lcd, 0x17);
 
-    lcdPower(&lcd, POWEROFF);
+    }while(!quit);
     closeI2LCD(&lcd);
-
-    printf("Time spent on LCD print function: %f\n", ts / 1000000.0);
 }
