@@ -34,7 +34,9 @@
 #include <inttypes.h>
 #include "LiquidCrystal_I2LCD.h"
 
-const uint8_t potTransTable[64] = {0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63};
+const uint8_t potCTransTable[64] = {0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63};
+const uint8_t potBTransTable[64] = {0,13,21,27,30,34,36,38,40,42,43,45,46,47,48,48,49,50,51,51,52,52,53,53,54,54,55,55,55,56,56,56,56,57,57,57,58,58,58,58,58,59,59,59,59,59,59,60,60,60,60,60,60,60,60,61,61,61,61,61,61,61,61,61};
+
 
 LiquidCrystal_I2LCD::LiquidCrystal_I2LCD (uint8_t lcd_Addr)
 {
@@ -297,7 +299,7 @@ void LiquidCrystal_I2LCD::readChar(uint8_t location, uint8_t *charmap, uint8_t c
  **/
 void LiquidCrystal_I2LCD::setBacklight(uint8_t value)
 {
-    _set(BACKLIGHT_CS, value);
+    _set(BACKLIGHT_CS, potBTransTable[value]);
 }
 
 /**
@@ -307,7 +309,7 @@ void LiquidCrystal_I2LCD::setBacklight(uint8_t value)
  **/
 void LiquidCrystal_I2LCD::setContrast(uint8_t value)
 {
-    _set(CONTRAST_CS, 0x3f - potTransTable[value]);
+    _set(CONTRAST_CS, 0x3f - potCTransTable[value]);
 }
 
 int LiquidCrystal_I2LCD::init()

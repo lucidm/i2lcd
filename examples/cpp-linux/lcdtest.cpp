@@ -24,19 +24,12 @@ int main(void)
     lcd.setBacklight(0x3f);
     lcd.setContrast(0x17);
     lcd.setGC(2, c2);
-
+    lcd.blink(1);
+    lcd.cursor(1);
     lcd.clear();
 
     lcd.setCursor(0, 0);
-    //string s("HelloWorld");
-
-    //lcd.print("Hello World!\nRow 1\nRow 2\nRow 3\n");
-    lcd.print("Hello universe!\x02");
-
-    //cout << lcd;
-
-    lcd.blink(1);
-    lcd.cursor(1);
+    lcd.print("Hello universe!");
 
     lcd._dump();
 

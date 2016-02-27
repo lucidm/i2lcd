@@ -10,11 +10,6 @@ if __name__ == "__main__":
 
     lcd = i2lcd.I2LCD(2, 0x20, 16, 1)
     lcd.power(1)
-    lcd.clear()
-
-    lcd.setCursor(0, 0)
-    lcd.fprint("\x02\x02Hello Emy\x02\x02")
-
     lcd.setGC(0x02, [0b00000,
 		     0b11011,
 		     0b11111,
@@ -24,14 +19,27 @@ if __name__ == "__main__":
 		     0b00000,
 		     0b00000,
 		    ])
-
-    lcd.setBacklight(0x3f)
-    lcd.setContrast(0x17)
+    lcd.clear()
+    lcd.setCursor(0, 0)
     lcd.blink(True)
     lcd.cursor(True)
 
+    lcd.fprint("\x02\x02Hello Emy\x02\x02")
+
+    for i in range(0x40):
+	lcd.setBacklight(i)
+	time.sleep(0.05)
+
+    #lcd.setBacklight(0x1f)
+    #lcd.setContrast(0x17)
+
     for i in range(lcd.rows):
 	print lcd.readRow(i)
+
+    for i in range(0x17):
+	lcd.setContrast(0x17)
+	time.sleep(0.1)
+
 
     time.sleep(3)
 

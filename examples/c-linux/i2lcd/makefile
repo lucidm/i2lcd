@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-pg -c -Og
+CFLAGS=-c -Og
 OBJS=pca9535.o pots.o i2lcd.o
 
 all: $(OBJS)

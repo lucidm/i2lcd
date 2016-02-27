@@ -4,7 +4,7 @@ LFLAGS=
 OBJS=i2lcd/pca9535.o i2lcd/pots.o i2lcd/i2lcd.o
 
 
-all: $(OBJS) lcdtest editlcd
+all: lcdbricontest lcdtest editlcd
 
 editlcd: editlcd.c $(OBJS)
 	$(CC) $(CFLAGS) -lform -lpanel -lncurses -D_XOPEN_SOURCE_EXTENDED -I./ -I./i2lcd $^ -o $@ $(LFLAGS)
@@ -12,11 +12,14 @@ editlcd: editlcd.c $(OBJS)
 lcdtest: lcdtest.c $(OBJS)
 	$(CC) $(CFLAGS) -lm -I./ -I./i2lcd $^ -o $@ $(LFLAGS)
 
+lcdbricontest: lcdbricon_test.c $(OBJS)
+	$(CC) $(CFLAGS) -lm -I./ -I./i2lcd $^ -o $@ $(LFLAGS)
+
 $(OBJS): i2lcd/%.o: i2lcd/%.c
 	$(MAKE) -C i2lcd
 
 clean:
-	rm -f *.o lcdtest editlcd
+	rm -f *.o lcdbricontest lcdtest editlcd
 	$(MAKE) -C i2lcd $@
 
 .PHONY: all clean

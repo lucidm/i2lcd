@@ -5,7 +5,8 @@
 #include <i2lcd.h>
 
 const t_DisplayType lcdTypesArray[] = {D6x1, D8x1, D8x2, D12x4, D16x0, D16x1, D16x2, D16x4, D20x2, D20x4, D24x2, D40x2};
-const uint8_t potTransTable[64] = {0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63};
+const uint8_t potCTransTable[64] = {0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63};
+const uint8_t potBTransTable[64] = {0,13,21,27,30,34,36,38,40,42,43,45,46,47,48,48,49,50,51,51,52,52,53,53,54,54,55,55,55,56,56,56,56,57,57,57,58,58,58,58,58,59,59,59,59,59,59,60,60,60,60,60,60,60,60,61,61,61,61,61,61,61,61,61};
 
 /**
  * @brief Helper function to space argument bits apart, so we can interleve
@@ -225,12 +226,12 @@ void closeI2LCD(t_I2Lcd *lcd)
 
 void lcdSetBacklight(t_I2Lcd *lcd, uint8_t value)
 {
-    setPot(&lcd->bpot, value);
+    setPot(&lcd->bpot, potBTransTable[value]);
 }
 
 void lcdSetContrast(t_I2Lcd *lcd, uint8_t value)
 {
-    setPot(&lcd->cpot, 0x3f - potTransTable[value]);
+    setPot(&lcd->cpot, 0x3f - potCTransTable[value]);
 }
 
 void lcdPower(t_I2Lcd *lcd, uint8_t power)

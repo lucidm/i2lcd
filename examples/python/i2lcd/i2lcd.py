@@ -22,17 +22,20 @@ def _checkPos(function):
 
 
 class I2LCD(object):
-    memaddr = {	16 : {0: [0x00], 1 : [0x00, 0x40], 2 : [0x00, 0x40], 4 : [0x00, 0x40, 0x10, 0x50]},
+    memaddr = {	6  : {1: [0x00], },
+                8  : {1: [0x00], 2: [0x40]},
+		12 : {4: [0x00, 0x40, 0x0C, 0x4C]},
+		16 : {0: [0x00], 1 : [0x00, 0x40], 2 : [0x00, 0x40], 4 : [0x00, 0x40, 0x10, 0x50]},
 	        20 : {2 : [0x00, 0x40], 4 : [0x00, 0x40, 0x14, 0x54]},
-		40 : {2 : [0x00, 0x40], 4 : [0x00, 0x40, 0x00, 0x40]}
+		24 : {2 : [0x00, 0x40]},
+		40 : {2 : [0x00, 0x40]},
 	      }
 
-    pottranstable = [0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63]
-
+    pottransctable = [0,10,16,21,24,27,29,31,33,35,36,37,39,40,41,42,43,44,44,45,46,47,47,48,49,49,50,50,51,51,52,52,53,53,54,54,55,55,55,56,56,57,57,57,58,58,58,59,59,59,60,60,60,60,61,61,61,62,62,62,62,63,63,63]
+    pottransbtable = [0,13,21,27,30,34,36,38,40,42,43,45,46,47,48,48,49,50,51,51,52,52,53,53,54,54,55,55,55,56,56,56,56,57,57,57,58,58,58,58,58,59,59,59,59,59,59,60,60,60,60,60,60,60,60,61,61,61,61,61,61,61,61,61]
 
     def __init__(self, bus, address, cols, rows):
 	self.iface = PCA9535(bus, address)
-
 
 	if not self.memaddr.has_key(cols):
 	    raise NotImplementedError
@@ -65,6 +68,10 @@ class I2LCD(object):
 			    lcdconst.SET_CGRAM_ADDRESS : 0,
 			    lcdconst.SET_DDRAM_ADDRESS : 0}
 	self.waitflag = 0
+
+    def __del__(self):
+	self.power(0)
+	self.close()
 
     def close(self):
 	self.setContrast(0x00)
@@ -214,21 +221,22 @@ class I2LCD(object):
 	self.command(lcdconst.ENTRY_MODE_SET, lcdconst.EMS_ID) #Increment by 1, no shift
 	sleep(0.3)
 	self.command(lcdconst.DISPLAY_ONOFF, lcdconst.DOO_D) #Display ON
-	sleep(0.06)
+	sleep(0.6)
 	self.waitflag = 1
 
     def power(self, power):
 	self.cpot.power(power)
 	self.bpot.power(power)
 	self.setControl(lcdconst.PWR, power)
+	self.waitflag = 0
 	if self.control & lcdconst.PWR:
 	    self.init()
 
     def setContrast(self, value):
-	self.cpot.set(0x3f - self.pottranstable[value])
+	self.cpot.set(0x3f - self.pottransctable[value])
 
     def setBacklight(self, value):
-	self.bpot.set(value)
+	self.bpot.set(self.pottransbtable[value])
 
     def blink(self, value):
 	self.command(lcdconst.DISPLAY_ONOFF, (self.commands[lcdconst.DISPLAY_ONOFF] | lcdconst.DOO_B) if value else (self.commands[lcdconst.DISPLAY_ONOFF] & (~lcdconst.DOO_B)))
@@ -239,7 +247,7 @@ class I2LCD(object):
     def display(self, value):
 	self.command(lcdconst.DISPLAY_ONOFF, (self.commands[lcdconst.DISPLAY_ONOFF] | lcdconst.DOO_D) if value else (self.commands[lcdconst.DISPLAY_ONOFF] & (~lcdconst.DOO_D)))
 
-    def test(self):
+    def __test(self):
 	self.iface.setPortDir(lcdconst.CPORT, 0x00)
 	self.iface.setPortDir(lcdconst.DPORT, 0x00)
 	self.iface.setPortOutput(lcdconst.CPORT, 0x00)
