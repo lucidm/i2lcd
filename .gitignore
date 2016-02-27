@@ -5,3 +5,6 @@
 **/*.[oa]
 **/*.pyc
 **/*.html
+examples/c-linux/editlcd
+examples/c-linux/lcdbricontest
+examples/c-linux/lcdtest
