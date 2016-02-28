@@ -3,12 +3,12 @@
 Here's little project of electronic module for ubiquitous Hitachi HD4470 based
 alphanumeric displays. Main reason for making the project was to drive the
 display using I2C bus. There are many existing I2C extension boards, with most popular
-built upon NXP PCF8574 8 bit port expander. This module however, use NXP PCA9535 16 bit expander and 
+built upon NXP PCF8574 8 bit port expander. This module however, use NXP PCA9535 16 bit expander and
 provide few additional functions.
 
 PCB of the module was made in KiCAD 4.0. Generated gerber
 files were sent to the PCD manufacturer and after few minor modifications and
-few weeks of waiting, PCB of a prototype were sent back. Here are the results.
+few weeks later, PCB of a prototype were sent back. Here are the results.
 
 ## What's the difference.
 

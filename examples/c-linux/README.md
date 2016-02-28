@@ -14,9 +14,10 @@ the library.
   definiton to C header file.
 
 
-* lcdtest - simple test using brighness and contrast manipulation which shows
+* lcdbricontest - simple test using brighness and contrast manipulation which shows
   current value of those parameters on the display.
 
+* lcdtest - simple test of the display
 
 ## Library - i2lcd subdirectory
 
@@ -26,3 +27,4 @@ the library.
 * pca9535.h - header file for the above
 * pots.c - source of api of the potentiometers used in the module
 * pots.h - header for pots.c api
+

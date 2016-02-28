@@ -15,7 +15,7 @@ Main directory contains few examples and library itself.
 
 ## The library
 
-* i2lcd.cpp - main library source file, I2Lcd
+* i2lcd.cpp - main library source file, with I2Lcd class API for the display
 * i2lcd.h - header for i2lcd.c
 * pca9535.cpp - source of PCA9535 class with its API
 * pca9535.h - header file for the above
