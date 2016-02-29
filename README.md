@@ -46,3 +46,5 @@ the display should be switched off (to save battery usage for example), you can
 do it from your code. However there are some issues regarding this version of
 module. Read this Wiki article about known issues and how to get rid of them.
 
+If you like to read more about the module please follow this link:
+https://github.com/lucidm/i2lcd/wiki
